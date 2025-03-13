@@ -17,7 +17,7 @@ source .venv/bin/activate
 ```
 Download necessary dependencies.
 ```
-pip install streamlit dash
+pip install streamlit dash yfinance
 ```
 
 Now we are ready to build our first dashboard apps :)

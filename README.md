@@ -11,7 +11,7 @@ Activate .venv:
 ```
 .venv\Scripts\activate
 ```
-* on Linux/MacOS
+* on Linux/macOS
 ```
 source .venv/bin/activate
 ```
@@ -22,6 +22,17 @@ pip install streamlit dash yfinance
 
 Now we are ready to build our first dashboard apps :)
 
-## Streamlit
-
 ## Dash
+Here is the file structure of a multi-page dash project.
+
+```
+├── app.py
+├── assets
+│   └── 01_style.css
+└── pages
+    ├── archive.py
+    ├── exchange-rate.py
+    ├── home.py
+```
+
+## Streamlit

@@ -1,51 +1,52 @@
-import yfinance as yf
 import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
-import plotly.graph_objects as go
-import pandas as pd
+import dash_bootstrap_components as dbc
+from dash import Input, Output, dcc, html
 
-app = dash.Dash()
+app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.DARKLY])
 
-app.layout = html.Div([
-    html.H1("CZK to PLN Exchange Rate"),
-    
-    dcc.DatePickerRange(
-        id='date-picker',
-        min_date_allowed=pd.to_datetime("2020-01-01").date(),
-        max_date_allowed=pd.to_datetime("today").date(),
-        start_date=pd.to_datetime("2024-01-01").date(),
-        end_date=pd.to_datetime("today").date(),
-    ),
-    
-    dcc.Graph(id='exchange-rate-chart')
-])
+# the style arguments for the sidebar. We use position:fixed and a fixed width
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "16rem",
+    "padding": "2rem 1rem",
+    "background-color": "#343a40",  # Dark background
+    "color": "white",
+}
 
-# Callback to update graph
-@app.callback(
-    Output('exchange-rate-chart', 'figure'),
-    Input('date-picker', 'start_date'),
-    Input('date-picker', 'end_date')
+# the styles for the main content position it to the right of the sidebar and
+# add some padding.
+CONTENT_STYLE = {
+    "margin-left": "18rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+    "background-color": "#212529",  # Dark background for content
+    "color": "white",
+}
+sidebar = html.Div(
+    [
+        html.H2("Apps", className="display-4"),
+        html.Hr(),
+        html.P("A collection of example Dash projects", className="lead"),
+        dbc.Nav(
+            [
+                dbc.NavLink("Home", href="/", active="exact"),
+                dbc.NavLink("Archive", href="/archive", active="exact"),
+                dbc.NavLink("Exchange rates", href="/exchange-rate", active="exact"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    style=SIDEBAR_STYLE,
 )
-def update_chart(start_date, end_date):
-    # Ensure date format is YYYY-MM-DD
-    start_date = pd.to_datetime(start_date).strftime('%Y-%m-%d')
-    end_date = pd.to_datetime(end_date).strftime('%Y-%m-%d')
-    
-    # Get exchange rates
-    czk_usd = yf.Ticker("CZKUSD=X").history(start=start_date, end=end_date)["Close"]
-    pln_usd = yf.Ticker("PLNUSD=X").history(start=start_date, end=end_date)["Close"]
-    
-    # Compute CZK to PLN rate
-    czk_pln = czk_usd / pln_usd
-    
-    # Create figure
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=czk_pln.index, y=czk_pln, mode='lines', name='CZK to PLN'))
-    fig.update_layout(title='CZK to PLN Exchange Rate Over Time', xaxis_title='Date', yaxis_title='Exchange Rate')
-    
-    return fig
 
-# Run app
-if __name__ == '__main__':
-    app.run_server(debug=True)
+content = html.Div(dash.page_container, style=CONTENT_STYLE)
+
+app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

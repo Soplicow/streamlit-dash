@@ -1,0 +1,10 @@
+.DateInput, .DateInput_input {
+    background-color: #343a40 !important;
+    color: white !important;
+    border: 1px solid white !important;
+}
+.DateRangePickerInput {
+    background-color: #343a40 !important;
+    color: white !important;
+    border: 1px solid white !important;
+}

@@ -48,7 +48,7 @@ layout = html.Div([
             },
             clearable=False 
         )],
-        style={"flex-grow": "1"}
+        style={"flex-wrap": "wrap"}
     ),
 ],
     style={"display": "flex"}

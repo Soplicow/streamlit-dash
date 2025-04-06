@@ -17,7 +17,7 @@ source .venv/bin/activate
 ```
 Download necessary dependencies.
 ```
-pip install streamlit dash yfinance dash_bootstrap_components
+pip install streamlit dash yfinance dash_bootstrap_components scikit-learn scikit-learn-extra
 ```
 
 Now we are ready to build our first dashboard apps :)

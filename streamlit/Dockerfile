@@ -45,7 +45,10 @@ USER appuser
 COPY . .
 
 # Expose the port that the application listens on.
-EXPOSE 8052
+EXPOSE 8501
 
-# Run the application.
-CMD streamlit run 'app.py' --server.port=8052 --server.address=0.0.0.0
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+# Use the default command to run the application.
+#ENTRYPOINT ["streamlit", "hello", "--server.port=8501", "--server.address=0.0.0.0"] # Streamlit hello page
+ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]

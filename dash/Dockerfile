@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies
-RUN pip install dash yfinance dash_bootstrap_components
+RUN pip install -r requirements.txt
 
 # Expose the port Dash runs on (default: 8050)
 EXPOSE 8050

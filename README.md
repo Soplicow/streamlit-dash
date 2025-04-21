@@ -56,7 +56,22 @@ python -m pip install -r .\requirements.txt
 ## Environment setup (Using docker)
 Make sure that Docker is installed and that the Docker Engine is running (Starting the Docker Desktop should do the trick)
 
+First, navigate to the folder:
+```
+cd .\streamlit\
+OR
+cd .\dash\
+```
+
+then create the docker container by using the command:
+```
+docker compose up
+```
+
+The app should be running now, in case that the app doesn't load try changing the url to localhost:8501
+
 ## Dash
+### Project Structure
 Here is the file structure of a multi-page dash project.
 
 ```

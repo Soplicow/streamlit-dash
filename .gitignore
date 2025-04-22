@@ -172,3 +172,6 @@ cython_debug/
 
 # Do not include presentation backup
 ~$Dash-Streamlit_Presentation.pptx
+
+# specific .json files
+notes.json

@@ -88,13 +88,12 @@ Here is the file structure of a multi-page dash project.
 ```
 
 ## Streamlit
-Streamlit is an open-source Python framework used to build interactive data apps - in only a few lines of code. Streamlit allows us to focus on what's important to us, instead of worrying about the code.
+Streamlit is an open-source Python framework used to build interactive data apps - in only a few lines of code. It allows us to focus on what's important to us, instead of worrying about the code.
 
 ### Key features
 
 - **Intuitive Syntax**
     One of Streamlit’s standout features is that it has intuitive default styles “baked in” so you can deploy and share polished apps with anyone anywhere. For example, to write a header, you use st.header(). To add some text, you use st.write(). Need a divider? Just use st.divider().
-
     No CSS, HTML, or JavaScript experience required!
 
 - **Seamlessly Composable**

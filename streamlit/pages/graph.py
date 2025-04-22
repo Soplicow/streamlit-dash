@@ -22,6 +22,8 @@ st.write("This is the graph page.")
 st.write("You can use this page to visualize stock market data.")
 st.write("Select a stock symbol, time period, and interval to view its historical data and graphs.")
 
+st.divider()
+
 st.write("## Search for a stock symbol")
 stock_symbol = st.text_input("Enter stock symbol (e.g., AAPL, MSFT):", "AAPL", help="Start typing to see suggestions.")
 suggested_symbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "FB", "NFLX", "NVDA", "BABA", "INTC"]
@@ -33,11 +35,13 @@ interval = st.selectbox("Select interval:", ["1m", "5m", "15m", "30m", "1h", "4h
 if st.button("Search"):
     stock_data = get_stock_data(stock_symbol, time_period, interval)
     if stock_data is not None:
+        st.divider()
         st.write(f"### You selected: {stock_symbol}")
         st.write("## Historical Data")
         st.dataframe(stock_data)
 
         try:
+            st.divider()
             st.write("## Stock Price Candle Graph")
             fig = go.Figure(data=[go.Candlestick(
                 x=stock_data.index,

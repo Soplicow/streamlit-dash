@@ -17,6 +17,12 @@ def save_notes(notes):
     with open(NOTES_FILE, "w") as file:
         json.dump(notes, file)
 
+def remove_note(index):
+    """Remove a note by index."""
+    if 0 <= index < len(st.session_state["notes"]):
+        st.session_state["notes"].pop(index)
+        save_notes(st.session_state["notes"])
+
 # Initialize session state for notes
 if "notes" not in st.session_state:
     st.session_state["notes"] = load_notes()
@@ -47,7 +53,13 @@ if st.session_state["notes"]:
     if sort_order == "Newest to Oldest":
         notes = reversed(notes)
     for i, note in enumerate(notes, start=1):
-        st.write(f"**{i}. {note['title']}**")
-        st.write(note["content"])
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.write(f"**{i}. {note['title']}**")
+            st.write(note["content"])
+        with col2:
+            if st.button("Remove", key=f"remove_{i}"):
+                remove_note(i - 1)
+                st.rerun()
 else:
     st.info("No notes yet. Add your first note!")

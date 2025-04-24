@@ -1,9 +1,8 @@
 import streamlit as st
+import pandas as pd
 
 @st.cache_data
 def from_data_file(filename):
-    url = (
-        "https://raw.githubusercontent.com/streamlit/"
-        "example-data/master/hello/v1/%s" % filename
-    )
-    return pd.read_json(url)
+    """Load data from a CSV file and return it as a DataFrame."""
+    return pd.read_csv(filename)
+

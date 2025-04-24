@@ -66,7 +66,7 @@ cd .\dash\
 ### Dash
 
 ### Streamlit
-then create the docker container by using the command:
+Create the docker container by using the command:
 ```
 docker compose up
 ```

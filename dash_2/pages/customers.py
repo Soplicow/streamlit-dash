@@ -6,8 +6,9 @@ import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, path="/customers", name="Customers Overview")
 
-df = pd.read_csv('./datasets/customers.csv')
+df = pd.read_csv('../datasets/customers.csv')
 
+# ---- Content Cards ----
 season_filter = html.Div([
     html.Label('Season: '),
     dbc.Checklist(
@@ -78,7 +79,7 @@ age_card = dbc.Card(
         dcc.Graph(id='age_hist')
     ]), className='h-100')
 
-
+# ---- Content Layout ----
 layout = dbc.Container([
         html.H2('Customers Overview'),
         dbc.Card(dbc.CardBody(season_filter)),
@@ -94,7 +95,7 @@ layout = dbc.Container([
         ])
 ],fluid=True)
 
-
+# ---- Callback ----
 @dash.callback(
     Output('gender_pie', 'figure'),
     Output('location_choropleth', 'figure'),

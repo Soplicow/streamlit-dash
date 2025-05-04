@@ -3,9 +3,11 @@ import dash_bootstrap_components as dbc
 from dash import Dash, dcc, html
 import plotly.io as pio
 
+# ---- Global color scheme for graphs ----
 pio.templates["pastel_trio"] = pio.templates["plotly_white"]
 pio.templates["pastel_trio"].layout.colorway = ["#A8DADC", "#C5a3D9", "#F6BD60"]
 pio.templates.default = "pastel_trio"
+# ----
 
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.LUMEN], suppress_callback_exceptions=True)
 app.title = 'Dashboard'

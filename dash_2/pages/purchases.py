@@ -6,8 +6,9 @@ import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, path="/purchases", name="Purchases Overview")
 
-df = pd.read_csv('./datasets/customers.csv')
+df = pd.read_csv('../datasets/customers.csv')
 
+# ---- Content Cards ----
 season_filter = html.Div([
     html.Label('Season: '),
     dbc.Checklist(
@@ -81,6 +82,7 @@ payment_card = dbc.Card([
     ])
 ], className='h-100')
 
+# ---- Content Layout ----
 layout = dbc.Container([
         html.H2('Purchases Overview'),
         dbc.Card(dbc.CardBody(season_filter)),
@@ -93,7 +95,7 @@ layout = dbc.Container([
         ]),
 ],fluid=True)
 
-
+# ---- Callback ----
 @dash.callback(
     Output('orders_bar', 'figure'),
     Output('discount_freq_bar', 'figure'),
@@ -143,23 +145,3 @@ def update_graphs(selected_seasons, group_by, selected_genders, selected_age_ran
     fig_don.update_layout(showlegend=True)
 
     return fig_bar_it_cat, fig_bar_freq, fig_don
-
-
-#@dash.callback(
-#    Output('purchase_hist', 'figure'),
-#    Output('age_purchase_scatter', 'figure'),
-#    Output('season_city_bar', 'figure'),
-#    Output('gender_boxplot', 'figure'),
-#    Input('purchase_season_filter', 'value'),
-#    Input('purchase_age_slider', 'value')
-#)
-#def update_purchase_graphs(seasons, age_val):
-#    dff = df[df['Season'].isin(seasons)]
-#    dff_age = df[df['Age'] == age_val]
-#
-#    hist = px.histogram(dff, x='Purchase Amount (USD)', nbins=20, title='Histogram of Purchases')
-#    scatter = px.scatter(dff_age, x='Age', y='Purchase Amount (USD)', color='Gender', title=f'Purchases at Age {age_val}')
-#    bar = px.bar(dff, x='Location', y='Purchase Amount (USD)', color='Season', barmode='group', title='City vs Purchases')
-#    box = px.box(dff, x='Gender', y='Purchase Amount (USD)', title='Purchases by Gender')
-
-#    return hist, scatter, bar, box

@@ -4,17 +4,18 @@ from dash import Dash, dcc, html
 import plotly.io as pio
 
 # ---- Global color scheme for graphs ----
-pio.templates["pastel_trio"] = pio.templates["plotly_white"]
-pio.templates["pastel_trio"].layout.colorway = ["#A8DADC", "#C5a3D9", "#F6BD60"]
-pio.templates.default = "pastel_trio"
+pio.templates['pastel_trio'] = pio.templates['plotly_white']
+pio.templates['pastel_trio'].layout.colorway = ['#A8DADC', '#C5a3D9', '#F6BD60']
+pio.templates.default = 'pastel_trio'
 # ----
 
-app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.LUMEN], suppress_callback_exceptions=True)
+app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB], suppress_callback_exceptions=True, 
+               meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 app.title = 'Dashboard'
 
 sidebar = html.Div(
     [
-        #title with icon
+        # ---- title with icon ----
         dbc.Row([
             dbc.Col([
                 dbc.Row([
@@ -23,7 +24,7 @@ sidebar = html.Div(
                 ], align='center', className='g-2')
             ])
         ], justify='start', align='center', style={'height': '65px'}),
-
+        # ----
         html.Hr(),
         dbc.Nav([
             dbc.NavLink('Customers overview', href='/customers', active='exact'),
@@ -33,7 +34,7 @@ sidebar = html.Div(
 )
 
 app.layout = html.Div([
-    dcc.Location(id="url", pathname='/customers'),
+    dcc.Location(id='url', pathname='/customers'),
     sidebar,
     html.Div(dash.page_container, className='content')
 ])

@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 
-dash.register_page(__name__, path="/purchases", name="Purchases Overview")
+dash.register_page(__name__, path='/purchases', name='Purchases Overview')
 
 df = pd.read_csv('../datasets/customers.csv')
 
@@ -17,17 +17,17 @@ season_filter = html.Div([
         value=['Spring', 'Summer', 'Fall', 'Winter'],
         inline=True,
         input_checked_style={
-                "backgroundColor": "#C5a3D9",
-                "borderColor": "#C5a3D9"},
+                'backgroundColor': '#C5a3D9',
+                'borderColor': '#C5a3D9'},
         className='checklist'
     ), 
 ], className='select_row')
 
 item_category_card = dbc.Card([
     dbc.CardBody([
-        html.H3("Purchases by Item and Category"),
+        html.H3('Purchases by Item and Category'),
         html.Div([
-            html.Label("Group by:"),
+            html.Label('Group by: '),
             dbc.RadioItems(
                 id='group_by',
                 options=[
@@ -44,17 +44,17 @@ item_category_card = dbc.Card([
 
 freq_card = dbc.Card([
     dbc.CardBody([
-        html.H3("Purchase Frequency by Discount Usage"),
+        html.H3('Purchase Frequency by Discount Usage'),
         html.Div([
-            html.Label("Select Gender(s):"),
+            html.Label('Select Gender(s): '),
             dbc.Checklist(
                 id='gender_filter',
                 options=[{'label': g, 'value': g} for g in sorted(df['Gender'].unique())],
                 value=df['Gender'].unique().tolist(),
                 inline=True,
                 input_checked_style={
-                    "backgroundColor": "#C5a3D9",
-                    "borderColor": "#C5a3D9"},
+                    'backgroundColor': '#C5a3D9',
+                    'borderColor': '#C5a3D9'},
                 className='checklist'
             ),
         ], className='select-row'),
@@ -65,8 +65,8 @@ freq_card = dbc.Card([
 
 payment_card = dbc.Card([
     dbc.CardBody([
-        html.H3("Payment Methods by Age"),
-        html.Label("Select Age Range:"),
+        html.H3('Payment Methods by Age'),
+        html.Label('Select Age Range: '),
         dcc.RangeSlider(
             id='age_range',
             min=int(df['Age'].min()),
@@ -74,11 +74,11 @@ payment_card = dbc.Card([
             step=1,
             value=[int(df['Age'].min()), int(df['Age'].max())],
             marks={i: str(i) for i in range(int(df['Age'].min()), int(df['Age'].max()) + 1, 5)},
-            tooltip={"placement": "bottom", "always_visible": True},
+            tooltip={'placement': 'bottom', 'always_visible': True},
             className='slider'
         ),
         html.Br(),
-        dcc.Loading(dcc.Graph(id='payment_donut'), type='dot', color='#C5a3D9')
+        dcc.Graph(id='payment_donut')
     ])
 ], className='h-100')
 
@@ -110,10 +110,10 @@ def update_graphs(selected_seasons, group_by, selected_genders, selected_age_ran
     dff = df[df['Season'].isin(selected_seasons)]
 
     # Items-Category Barplot
-    grouped = dff.groupby([group_by, 'Gender']).size().reset_index(name='OrderCount')
+    grouped = dff.groupby([group_by, 'Gender']).size().reset_index(name='Count')
 
-    fig_bar_it_cat = px.bar(grouped, x=group_by, y='OrderCount', color='Gender', barmode='group')
-    fig_bar_it_cat.update_layout(xaxis_title=group_by, yaxis_title="Number of Orders", legend_title='Gender')
+    fig_bar_item_cat = px.bar(grouped, x=group_by, y='Count', color='Gender', barmode='group')
+    fig_bar_item_cat.update_layout(xaxis_title=group_by, yaxis_title='Number of Orders', legend_title='Gender')
 
 
     # Frequency-Discount Barplot
@@ -136,12 +136,10 @@ def update_graphs(selected_seasons, group_by, selected_genders, selected_age_ran
     payment_counts = dff['Payment'].value_counts().reset_index()
     payment_counts.columns = ['Payment Method', 'Count']
 
-    fig_don = px.pie(payment_counts,
+    fig_donut = px.pie(payment_counts,
                  names='Payment Method',
                  values='Count',
-                 hole=0.4,
-                 color_discrete_sequence=px.colors.qualitative.Pastel)
+                 hole=0.4
+                 ) #color_discrete_sequence=px.colors.qualitative.Pastel
 
-    fig_don.update_layout(showlegend=True)
-
-    return fig_bar_it_cat, fig_bar_freq, fig_don
+    return fig_bar_item_cat, fig_bar_freq, fig_donut

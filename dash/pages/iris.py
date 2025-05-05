@@ -1,5 +1,6 @@
 import dash
 from dash import Input, Output, dcc, html
+import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -15,12 +16,11 @@ algorithms = {
     'Kmedoids': KMedoids(n_clusters=3, random_state=42)
 }
 
-layout = html.Div([
-    html.Div([
-        html.H4('Interactive scatter plot with Iris dataset'),
+interactive_plot_card = dbc.Card([
+    dbc.CardBody([
+        html.H5('Interactive scatter plot with Iris dataset'),
         dcc.Graph(
             id="scatter-plot",
-            style={"background-color": "#212529"}
         ),
         html.P("Filter by petal width:"),
         dcc.RangeSlider(
@@ -28,31 +28,62 @@ layout = html.Div([
             min=0, max=2.5, step=0.1,
             marks={0: '0', 2.5: '2.5'},
             value=[0, 2.5]
-        )],
-        style={"width": "50%"}
-    ),
-    html.Div([
-        html.H4('Different clustering algorithms applied to iris dataset'),
+        ),
+    ])
+])
+
+clustering_plot_card = dbc.Card([
+    dbc.CardBody([
+        html.H5('Different clustering algorithms applied to Iris dataset'),
         dcc.Graph(
             id="scatter-plot2",
-            style={"background-color": "#212529"}
         ),
         html.P("Choose clustering algorithm:"),
         dcc.Dropdown(
             list(algorithms.keys()), 
             list(algorithms.keys())[0], 
             id='cluster-alg-dropdown',
-            style={
-                "background-color": "#212529",
-                "color": "white",               
-            },
             clearable=False 
-        )],
-        style={"flex-wrap": "wrap"}
-    ),
-],
-    style={"display": "flex"}
-)
+        ),
+    ])
+])
+
+layout = html.Div([
+#    html.Div([
+#        html.H4('Interactive scatter plot with Iris dataset'),
+#        dcc.Graph(
+#            id="scatter-plot",
+#        ),
+#        html.P("Filter by petal width:"),
+#        dcc.RangeSlider(
+#            id='range-slider',
+#            min=0, max=2.5, step=0.1,
+#            marks={0: '0', 2.5: '2.5'},
+#            value=[0, 2.5]
+#        )],
+#    ),
+#    html.Div([
+#        html.H4('Different clustering algorithms applied to iris dataset'),
+#        dcc.Graph(
+#            id="scatter-plot2",
+#        ),
+#        html.P("Choose clustering algorithm:"),
+#        dcc.Dropdown(
+#            list(algorithms.keys()), 
+#            list(algorithms.keys())[0], 
+#            id='cluster-alg-dropdown',
+#            clearable=False 
+#        )],
+#        style={"flex-wrap": "wrap"}
+#    ),
+#],
+#    style={"display": "flex"}
+    html.H2('Iris dataset'),
+    dbc.Row([
+        dbc.Col(interactive_plot_card, width=6),
+        dbc.Col(clustering_plot_card, width=6)
+    ])
+])
 
 
 @dash.callback(
@@ -66,11 +97,6 @@ def update_scatter_plot(slider_range):
         df[mask], x="sepal_width", y="sepal_length",
         color="species", size='petal_length',
         hover_data=['petal_width']
-    )
-    fig.update_layout(
-        plot_bgcolor="#212529",
-        paper_bgcolor="#212529",
-        font=dict(color="white")
     )
     return fig
 
@@ -86,10 +112,5 @@ def update_scatter_plot2(alg_name):
         df, x="sepal_width", y="sepal_length",
         color=y_pred, size='petal_length',
         hover_data=['petal_width']
-    )
-    fig.update_layout(
-        plot_bgcolor="#212529",
-        paper_bgcolor="#212529",
-        font=dict(color="white")
     )
     return fig

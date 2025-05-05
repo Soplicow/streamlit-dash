@@ -1,5 +1,6 @@
 import dash
 from dash import Input, Output, dcc, html
+import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 
@@ -11,6 +12,25 @@ df = df.dropna(subset=["mass (g)"])
 df = df.sort_values("mass (g)", ascending=False).head(1000)
 
 # print(df)
+
+map_card = dbc.Card([
+    dbc.CardBody([
+        dcc.Graph(
+            figure = px.scatter_geo(df, lat="reclat", lon="reclong", size="mass (g)", hover_name="name"),
+            id="meteorite-map",
+        ),
+        html.H4("Filter by Year"),
+        dcc.RangeSlider(
+            id='year-slider',
+            min=int(df['year'].min()),
+            max=int(df['year'].max()),
+            step=1,
+            value=[int(df['year'].min()), int(df['year'].max())],
+            marks={int(year): str(int(year)) for year in df['year'].dropna().unique()[::10]},
+            tooltip={"placement": "bottom", "always_visible": True},
+        ),
+    ])
+]) 
 
 layout = html.Div([
     # html.H1('Table of meteorite data'),
@@ -28,22 +48,8 @@ layout = html.Div([
     #         "color": "white",
     #     },
     # ),
-    html.H4('Map of meteorite landings'),
-    dcc.Graph(
-        figure = px.scatter_geo(df, lat="reclat", lon="reclong", size="mass (g)", hover_name="name"),
-        id="meteorite-map",
-        style={"background-color": "#212529", "color": "white"}
-    ),
-    html.H4("Filter by Year"),
-    dcc.RangeSlider(
-        id='year-slider',
-        min=int(df['year'].min()),
-        max=int(df['year'].max()),
-        step=1,
-        value=[int(df['year'].min()), int(df['year'].max())],
-        marks={int(year): str(int(year)) for year in df['year'].dropna().unique()[::10]},
-        tooltip={"placement": "bottom", "always_visible": True},
-    ),
+    html.H2('Map of meteorite landings'),
+    map_card,
 ])
 
 @dash.callback(
@@ -61,12 +67,6 @@ def update_scatter_plot(year_range):
         hover_name="name",
         color="year",
         projection="natural earth"
-    )
-
-    fig.update_layout(
-        plot_bgcolor="#212529",
-        paper_bgcolor="#212529",
-        font=dict(color="white")
     )
 
     return fig

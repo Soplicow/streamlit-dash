@@ -1,84 +1,47 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import Input, Output, dcc, html
+from dash import Dash, dcc, html
+import plotly.io as pio
 
-app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.DARKLY])
+# ---- Global color scheme for graphs ----
+pio.templates['pastel_trio'] = pio.templates['plotly_white']
+pio.templates['pastel_trio'].layout.colorway = ['#A8DADC', '#C5a3D9', '#F6BD60']
+pio.templates.default = 'pastel_trio'
+# ----
 
-SIDEBAR_STYLE = {
-    "position": "fixed",
-    "top": 0,
-    "left": 0,
-    "bottom": 0,
-    "width": "16rem",
-    "padding": "3rem 1rem",
-    "background-color": "#343a40",
-    "color": "white",
-}
+app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB], suppress_callback_exceptions=True, 
+               meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
+app.title = 'Dashboard'
 
-CONTENT_STYLE = {
-    "margin-left": "18rem",
-    "margin-right": "2rem",
-    "padding": "2rem 1rem",
-    "background-color": "#212529",
-    "color": "white",
-}
-
-toggle_button = dbc.Button(
-    "☰", id="toggle-button", color="secondary",
-    style={
-        "position": "absolute",
-        "top": "10px",
-        "left": "10px",
-        "zIndex": 1100,
-        "margin-bottom": "20px",
-        "background-color": "transparent",
-    }
-)
-
-sidebar = html.Div([
-    html.H2("Apps", className="display-4"),
-    html.Hr(),
-    html.P("A collection of example Dash projects", className="lead"),
-    dbc.Nav(
-        [
+sidebar = html.Div(
+    [
+        # ---- title with icon ----
+        dbc.Row([
+            dbc.Col([
+                dbc.Row([
+                    dbc.Col(html.Img(src=app.get_asset_url('dashboard.png'), height='35px'), width='auto'),
+                    dbc.Col(html.H1('Dashboard', style={'fontSize': '35px', 'margin': 0}))
+                ], align='center', className='g-2')
+            ])
+        ], justify='start', align='center', style={'height': '65px'}),
+        # ----
+        html.Hr(),
+        dbc.Nav([
             dbc.NavLink("Home", href="/", active="exact"),
-            dbc.NavLink("Archive", href="/archive", active="exact"),
             dbc.NavLink("Exchange rates", href="/exchange-rate", active="exact"),
-            dbc.NavLink("Iris", href="/iris", active="exact"),
-            dbc.NavLink("Meteorites", href="/meteorites", active="exact"),
-        ],
-        vertical=True,
-        pills=True,
-    )],
-    style=SIDEBAR_STYLE,
-    id="sidebar"
+            dbc.NavLink("Iris analysis", href="/iris", active="exact"),
+            dbc.NavLink("Meteorite landings", href="/meteorites", active="exact"),
+            dbc.NavLink('Customers overview', href='/customers', active='exact'),
+            dbc.NavLink('Purchases overview', href='/purchases', active='exact'),
+        ], vertical=True,pills=True)
+    ], className='sidebar'
 )
 
-content = html.Div(dash.page_container, style=CONTENT_STYLE, id="content")
-
-app.layout = html.Div([dcc.Location(id="url"), toggle_button, sidebar, content])
-
-@app.callback(
-    Output("sidebar", "style"),
-    Output("content", "style"),
-    Input("toggle-button", "n_clicks"),
-    prevent_initial_call=True,
-)
-def toggle_sidebar(n_clicks):
-    if n_clicks and n_clicks % 2 != 0:
-        return (
-            {"display": "none"}, 
-            {
-                "margin-left": "4rem",
-                "margin-right": "auto",
-                "padding": "2rem 1rem",
-                "background-color": "#212529",
-                "color": "white",
-            }
-        )
-    else:
-        return SIDEBAR_STYLE, CONTENT_STYLE
-
+app.layout = html.Div([
+    dcc.Location(id='url', pathname='/'),
+    sidebar,
+    html.Div(dash.page_container, className='content')
+])
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8050, debug=True)
+    app.run(debug=True)

@@ -44,6 +44,9 @@ USER appuser
 # Copy the source code into the container.
 COPY . .
 
+# Copy the datasets directory into the container.
+COPY datasets datasets
+
 # Expose the port that the application listens on.
 EXPOSE 8501
 

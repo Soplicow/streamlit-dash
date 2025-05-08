@@ -1,27 +1,4 @@
 # DataDashboardPython
-## Environment setup
-Make sure that you have Python installed. Then, create virtual environment:
-
-```
-python3 -m venv .venv
-```
-
-Activate .venv:
-* on Windows
-```
-.venv\Scripts\Activate.ps1
-```
-* on Linux/macOS
-```
-source .venv/bin/activate
-```
-Download necessary dependencies.
-```
-pip install streamlit dash yfinance dash_bootstrap_components scikit-learn scikit-learn-extra
-```
-
-Now we are ready to build our first dashboard apps :)
-
 ## Environment setup (Using venv)
 Make sure that you have Python installed. We need to create the  virtual enviroment inside BOTH the dash and streamlit folders:
 

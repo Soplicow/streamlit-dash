@@ -124,7 +124,8 @@ if __name__ == "__main__":
 
 ### 1.2 Page layout: 'Customers Overview'
 Preview of the page:
-![image](./readme_images/customers_preview.png)
+
+<img src="./readme_images/customers_preview.png" width="850"/>
 
 In the `pages` folder, create a file named `customers.py`:
 
@@ -139,7 +140,8 @@ dash.register_page(__name__, path='/customers', name='Customers Overview')
 ```
 
 Component structure:
-![image](./readme_images/customers_structure.png)
+
+<img src="./readme_images/customers_structure.png" width="850"/>
 
 ```python
 layout = dbc.Container([
@@ -219,7 +221,7 @@ df = pd.read_csv('../datasets/customers.csv', sep=',')
 >  Payment        | str       |  Payment method
 >  Frequency      | str       |  Purchase frequency - Weekly, Bi-Weekly...
 
-Store content of each `dbc.Card` into variables for readability.
+For clarity, we will store the contents of individual `dbc.Card` in variables, which will then be added to the `layout` variable.
 
 * `season_filter` — filter for seasons used across all charts:
     ```python
@@ -330,8 +332,11 @@ From the `dash` module, import:
 ```python
 from dash import Input, Output
 ```
+In the section under `layout` we define the decorator `@dash.callback` with Outputs and Inputs.
 
-Define the `@callback` below your `layout`:
+The first parameter of Input/Output is `component_id`, the second is `component_property` according to the character of the component (e.g. `value`, `figure`, `children`).
+Dash calls the function defined under the decorator whenever the property of the input component changes, in order to update the property in the output component.
+The order of Inputs corresponds to the inputs of the function and the return values ​​of the function correspond to the Outputs (i.e. the order is important).
 
 ```python
 @dash.callback(
@@ -345,12 +350,10 @@ Define the `@callback` below your `layout`:
     Input('age_range', 'value')
 )
 ```
-The first parameter is the component `id`, the second is the property to update.
-Note: The order of Outputs and Inputs matters.
 
 ### Creating charts
 
-Define a function returning `figure`s for each chart. Input parameters should match the Inputs order. The return values should match the Output order in `layout`.
+The function under the `@dash.callback` decorator returns `figure` for each graph. The parameters are entered into the function in the order specified in the Inputs. The function must return the graphs in the order as defined in the Outputs (and therefore in the `layout`).
 
 ## 5. Styling
 
@@ -439,25 +442,26 @@ input[type='checkbox']{
 ## 6. Task  
 Create a new page called **'Purchases Overview'**.
 
-Preview of the page:  
-![image](./readme_images/purchases_preview.png)
+**Preview of the page:**
 
-Component structure:  
-![image](./readme_images/purchases_structure.png)
+<img src="./readme_images/purchases_preview.png" width="850"/>
 
-### Steps to implement  
-Tips:
-* Create a new file in the `pages` folder (and add the page to the Navbar in `app.py`)
-* Column names:
+**Component structure:**
 
-    1. Chart (Barplot Item-Category) — columns: `'Item'`, `'Category'`, `'Gender'`
-    2. *Chart (Donut chart Payment methods) — columns: `'Payment'`, `'Age'`
-    3. Chart (Stacked barplot Frequency-Discount used) — columns: `'Frequency'`, `'Discount'`, `'Gender'`
-        * Use this logically ordered list of purchase frequencies:
-        ```python
-        freq_order = ['Weekly', 'Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
-        ```
+<img src="./readme_images/purchases_structure.png" width="850"/>
 
+### Description:
+* Season filter for all charts on the page
+* Chart 1: Barplot showing the number of orders made by men or women (column 'Gender') either by items (column 'Item') or by item categories ('column 'Category'). Grouping filter -- radio button.
+<img src="./readme_images/purchases_item.png" width="650"/> <img src="./readme_images/purchases_category.png" width="650"/>
+* Chart 2: Donut chart showing the payment methods used (column 'Payment'), where you can use the Slider to filter by age range (column 'Age')
+* Chart 3: Stacked Barplot showing the representation of orders in individual purchase frequencies (column 'Frequency') based on the application of a discount (column 'Discount'; values ​​Yes/No). In the chart, you can filter data by gender (column 'Gender') using the Chechbutton.
+* here is a list of logically ordered purchase frequency options:
+```python
+freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
+```
+
+### Helps and solutions
 ---
 
 **Layout and Card Components:**

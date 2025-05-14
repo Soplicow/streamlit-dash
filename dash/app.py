@@ -28,18 +28,14 @@ sidebar = html.Div(
         # ----
         html.Hr(),
         dbc.Nav([
-            dbc.NavLink("Home", href="/", active="exact"),
-            dbc.NavLink("Exchange rates", href="/exchange-rate", active="exact"),
-            dbc.NavLink("Iris analysis", href="/iris", active="exact"),
-            dbc.NavLink("Meteorite landings", href="/meteorites", active="exact"),
             dbc.NavLink('Customers overview', href='/customers', active='exact'),
             dbc.NavLink('Purchases overview', href='/purchases', active='exact'),
-        ], vertical=True,pills=True)
+        ], vertical=True, pills=True)
     ], className='sidebar'
 )
 
 app.layout = html.Div([
-    dcc.Location(id='url', pathname='/'),
+    dcc.Location(id='url', pathname='/customers'),
     sidebar,
     html.Div(dash.page_container, className='content')
 ])

@@ -1,71 +1,43 @@
-# DataDashboardPython
+# DataDashboardPython: Streamlit and Dash
 ## Environment setup
-Make sure that you have Python installed. Then, create virtual environment:
+Make sure that you have Python installed. Then, create virtual environment (**On school computers in Virtual Studio Code, use the Command Prompt (cmd) terminal**):
 
-```
-python3 -m venv .venv
-```
-
-Activate .venv:
-* on Windows
-```
-.venv\Scripts\Activate.ps1
-```
-* on Linux/macOS
-```
-source .venv/bin/activate
-```
-Download necessary dependencies.
-```
-pip install streamlit dash yfinance dash_bootstrap_components scikit-learn scikit-learn-extra
-```
-
-Now we are ready to build our first dashboard apps :)
-
-## Environment setup (Using venv)
-Make sure that you have Python installed. We need to create the  virtual enviroment inside BOTH the dash and streamlit folders:
-
-First, navigate to the folder:
-```
-cd .\streamlit\
-OR
-cd .\dash\
-```
-
-then create the virtual enviroment inside a .venv folder:
 ```
 python -m venv .venv
 ```
 
-The virtual environment can then be enabled using:
+Activate .venv:
 * on Windows
-```
-.venv\Scripts\Activate.ps1
-```
-
+    ```
+    .venv\Scripts\Activate
+    ```
 * on Linux/macOS
-```
-source .venv/bin/activate
-```
+    ```
+    source .venv/bin/activate
+    ```
 
-After the virtual enviroment is enabled the requirements can be installed using:
-```
-python -m pip install -r .\requirements.txt
-```
-
-## Environment setup (Using docker)
-Make sure that Docker is installed and that the Docker Engine is running (Starting the Docker Desktop should do the trick)
-
-First, navigate to the folder:
+Navigate to the folder:
 ```
 cd .\streamlit\
 OR
 cd .\dash\
 ```
 
-### Dash
+Download necessary dependencies:
+```
+pip install -r requirements.txt
+```
 
-### Streamlit
+Now we are ready to build our first dashboard apps :)
+
+## Environment setup (Using docker)
+Make sure that Docker is installed and that the Docker Engine is running (Starting the Docker Desktop should do the trick)
+
+Navigate to the folder:
+```
+cd .\streamlit\
+```
+
 Create the docker container by using the command:
 ```
 docker compose up
@@ -73,21 +45,12 @@ docker compose up
 
 The app should be running now, in case that the app doesn't load try changing the url to localhost:8501
 
-## Dash
-### Project Structure
-Here is the file structure of a multi-page dash project.
+*** 
+***
 
-```
-├── app.py
-├── assets
-│   └── 01_style.css
-└── pages
-    ├── archive.py
-    ├── exchange-rate.py
-    ├── home.py
-```
-
+--> This section below will be moved to streamlit_tutorial readme please. <--
 ## Streamlit
+
 Streamlit is an open-source Python framework used to build interactive data apps - in only a few lines of code. It allows us to focus on what's important to us, instead of worrying about the code.
 
 ### Key features

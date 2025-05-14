@@ -238,7 +238,6 @@ else:
 ```
 
 ## 2. Data/Resource Caching
-## 2. Data/Resource Caching
 
 Streamlit provides two main caching decorators to optimize performance:
 

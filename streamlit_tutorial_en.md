@@ -4,6 +4,19 @@
 * Enables rapid prototyping with minimal code
 * [Documentation](https://docs.streamlit.io/)
 
+## Key features
+
+- **Intuitive Syntax**
+    One of Streamlit’s standout features is that it has intuitive default styles “baked in” so you can deploy and share polished apps with anyone anywhere. For example, to write a header, you use st.header(). To add some text, you use st.write(). Need a divider? Just use st.divider().
+    No CSS, HTML, or JavaScript experience required!
+
+- **Seamlessly Composable**
+    With Streamlit, you don’t have to do any “app thinking” – you don’t have to think about the UI, the styling, or the routing. It simply extends what you’re already doing in Python. 
+
+- **Your go-to UI**
+    Streamlit gets you to a working version 0 of your app faster. You can get your app in front of users faster, get feedback faster, and improve faster. Streamlit makes your iteration cycles shorter.
+
+
 ## Installation and environment setup
 
 ### Venv

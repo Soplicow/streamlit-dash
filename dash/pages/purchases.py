@@ -27,7 +27,7 @@ item_category_card = dbc.Card([
     dbc.CardBody([
         html.H3('Purchases by Item and Category'),
         html.Div([
-            html.Label('Group by: '),
+            html.Label('Group by:'),
             dbc.RadioItems(
                 id='group_by',
                 options=[
@@ -46,7 +46,7 @@ freq_card = dbc.Card([
     dbc.CardBody([
         html.H3('Purchase Frequency by Discount Usage'),
         html.Div([
-            html.Label('Select Gender(s): '),
+            html.Label('Select Gender(s):'),
             dbc.Checklist(
                 id='gender_filter',
                 options=[{'label': g, 'value': g} for g in sorted(df['Gender'].unique())],
@@ -66,7 +66,7 @@ freq_card = dbc.Card([
 payment_card = dbc.Card([
     dbc.CardBody([
         html.H3('Payment Methods by Age'),
-        html.Label('Select Age Range: '),
+        html.Label('Select Age Range:'),
         dcc.RangeSlider(
             id='age_range',
             min=int(df['Age'].min()),
@@ -110,25 +110,21 @@ def update_graphs(selected_seasons, group_by, selected_genders, selected_age_ran
     dff = df[df['Season'].isin(selected_seasons)]
 
     # Items-Category Barplot
-    grouped = dff.groupby([group_by, 'Gender']).size().reset_index(name='Count')
+    grouped = dff.groupby([group_by, 'Gender']).size().reset_index(name='OrderCount')
 
-    fig_bar_item_cat = px.bar(grouped, x=group_by, y='Count', color='Gender', barmode='group')
-    fig_bar_item_cat.update_layout(xaxis_title=group_by, yaxis_title='Number of Orders', legend_title='Gender')
-
+    fig_bar_item_cat = px.bar(grouped, x=group_by, y='OrderCount', color='Gender', barmode='group')
+    fig_bar_item_cat.update_layout(xaxis_title=group_by, yaxis_title="Number of Orders", legend_title='Gender')
 
     # Frequency-Discount Barplot
     dff = df[df['Gender'].isin(selected_genders)]
     freq_counts = dff.groupby(['Frequency', 'Discount']).size().reset_index(name='Count')
 
-    freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
-    freq_counts['Frequency'] = pd.Categorical(freq_counts['Frequency'], categories=freq_order, ordered=True)
-    freq_counts = freq_counts.sort_values('Frequency')
-
     fig_bar_freq = px.bar(freq_counts,
                  x='Frequency', y='Count', color='Discount',
                  barmode='stack',
                  labels={'Frequency': 'Purchase Frequency', 'Count': 'Number of Customers'})
-    
+    fig_bar_freq.update_xaxes(categoryorder='array', categoryarray=['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually'])
+
     # Payment Donut
     min_age, max_age = selected_age_range
     dff = df[(df['Age'] >= min_age) & (df['Age'] <= max_age)]
@@ -139,7 +135,6 @@ def update_graphs(selected_seasons, group_by, selected_genders, selected_age_ran
     fig_donut = px.pie(payment_counts,
                  names='Payment Method',
                  values='Count',
-                 hole=0.4
-                 ) #color_discrete_sequence=px.colors.qualitative.Pastel
+                 hole=0.4) #color_discrete_sequence=px.colors.qualitative.Pastel
 
     return fig_bar_item_cat, fig_bar_freq, fig_donut

@@ -12,6 +12,7 @@ pio.templates.default = 'pastel_trio'
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB], suppress_callback_exceptions=True, 
                meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 app.title = 'Dashboard'
+app._favicon = ('./dashboard.png')
 
 sidebar = html.Div(
     [

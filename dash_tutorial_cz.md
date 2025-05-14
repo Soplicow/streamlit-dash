@@ -70,6 +70,7 @@ from dash import Dash, dcc, html
 
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
 app.title = 'Dashboard'
+app._favicon = ('./dashboard.png')
 
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -226,7 +227,7 @@ Obsah jednotlivých `dbc.Card` budeme pro přehlednost ukládat do proměnných,
 * `season_filter` -- filtr ročního období pro všechny grafy na stránce:
     ```python
     season_filter = html.Div([
-        html.Label('Season: '),
+        html.Label('Season:'),
         dbc.Checklist(
             id='season_filter',
             options=['Spring', 'Summer', 'Fall', 'Winter'],
@@ -239,18 +240,17 @@ Obsah jednotlivých `dbc.Card` budeme pro přehlednost ukládat do proměnných,
         ), 
     ], className='select_row')
     ```
+
 * `gender_card` -- graf zobrazující rozložení pohlaví zákazníků
     ```python
     gender_card = dbc.Card([
         dbc.CardBody([
             html.H3('Gender'),
-            dbc.Row(
-                dcc.Dropdown(
-                    id='location_dropdown',
-                    options=[{'label': loc, 'value': loc} for loc in sorted(df['State_name'].unique())],
-                    value=df['State_name'].unique()[0],
-                    className='dropdown'
-                     ),
+            dcc.Dropdown(
+                id='location_dropdown',
+                options=[{'label': loc, 'value': loc} for loc in sorted(df['State_name'].unique())],
+                value=df['State_name'].unique()[0],
+                className='dropdown'
                 ),
             dcc.Graph(id='gender_pie')
         ])
@@ -262,7 +262,7 @@ Obsah jednotlivých `dbc.Card` budeme pro přehlednost ukládat do proměnných,
     location_card = dbc.Card([
         dbc.CardBody([
             html.H3('Location'),
-            html.Label('Select age range: '),
+            html.Label('Select age range:'),
             dcc.RangeSlider(
                 id='age_range',
                 min=int(df['Age'].min()),
@@ -270,13 +270,14 @@ Obsah jednotlivých `dbc.Card` budeme pro přehlednost ukládat do proměnných,
                 step=1,
                 value=[int(df['Age'].min()), int(df['Age'].max())],
                 marks={i: str(i) for i in range(int(df['Age'].min()), int(df['Age'].max()) + 1, 5)},
-                tooltip={"placement": "bottom", "always_visible": True},
+                tooltip={'placement': 'bottom', 'always_visible': True},
                 className='slider'
             ),
             dcc.Graph(id='location_choropleth')
         ])
-    ],)
+    ])
     ```
+
 * `review_card` - graf zobrazující hodnocení v závislosti na částně objednávky
     ```python
     review_card = dbc.Card(
@@ -293,7 +294,7 @@ Obsah jednotlivých `dbc.Card` budeme pro přehlednost ukládat do proměnných,
         dbc.CardBody([
             html.H3('Age'),
             html.Div([
-                html.Label('Select gender: '),
+                html.Label('Select gender:'),
                 dbc.RadioItems(
                     id='gender_radio',
                     options=[{'label': g, 'value': g} for g in df['Gender'].unique()],
@@ -306,6 +307,7 @@ Obsah jednotlivých `dbc.Card` budeme pro přehlednost ukládat do proměnných,
         ]), className='h-100'
     )
     ```
+
 Layout:
 ```python
 layout = dbc.Container([
@@ -321,7 +323,7 @@ layout = dbc.Container([
             dbc.Col(review_card, width=7, className='card_chart'),
             dbc.Col(age_card, width=5, className='card_chart')
         ])
-],fluid=True)
+], fluid=True)
 ```
 
 ## 4. Callback
@@ -349,15 +351,49 @@ Pořadí Inputů odpovídá vstupům funkce a návratové hodnoty funkce odpoví
 ```
 
 ### Tvorba grafů
-
 Komponenta `dcc.Graph` vykresluje vizualizace dat pomocí grafů předané jako argument `figure`.
 
 Funkce pod dekorátorem `@dash.callback` vrací `figure` pro jednotlivé grafy. Do funkce vstupují parametry v pořadí určení Inputů. Funkce musí vracet grafy v pořadí, jak jsou definované v Outputech (potažmo v `layout`).
 
+```python
+def update_graphs(seasons, selected_location, selected_gender, selected_age_range):
+    dff = df[df['Season'].isin(seasons)]
+
+    # Gender Pie
+    pie_df = dff[dff['State_name'] == selected_location]
+    fig_pie = px.pie(pie_df, names='Gender')
+    fig_pie.update_layout(height=400)
+
+    # Choropleth map (grouped and counted by state)
+    pastel_colorscale = [[0.0, '#A8DADC'], [1.0, '#C5a3D9']] 
+    min_age, max_age = selected_age_range
+    age_df = dff[(dff['Age'] >= min_age) & (dff['Age'] <= max_age)]
+    age_df = age_df.groupby('State_abbr').size().reset_index(name='Count')
+    fig_map = px.choropleth(
+        age_df,
+        locations='State_abbr',
+        locationmode='USA-states',
+        scope='usa',
+        color='Count',
+        color_continuous_scale=pastel_colorscale)
+    fig_map.update_layout(height=450)
+
+    # Average Review Rating Line Chart
+    agg_df = dff.groupby('Amount')['Review_Rating'].mean().reset_index()
+    fig_line = px.line(agg_df, x='Amount', y='Review_Rating', markers=True)
+    fig_line.update_layout(xaxis_title='Amount (USD)', yaxis_title='Average Review Rating', height=450)
+
+    # Age Histogram
+    gender_df = dff[dff['Gender'] == selected_gender]
+    fig_hist = px.histogram(gender_df, x='Age', nbins=20)
+    fig_hist.update_layout(height=400)
+    fig_hist.update_traces(marker_color='#C5a3D9', marker_line_width=1, marker_line_color='white')
+
+    return fig_pie, fig_map, fig_line, fig_hist
+```
 
 ## 5. Stylování
-
-Barevnou paletu (a plotly.theme) pro grafy si můžeme globálně nastavit v souboru `app.py`:
+Barevnou paletu a plotly.theme pro grafy si můžeme globálně nastavit v souboru `app.py`:
 ```python
 import plotly.io as pio
 
@@ -397,7 +433,6 @@ body{
     width: 16rem;
     padding: 1rem 1rem;
     background-color: #ffffff;
-
 }
 
 .nav-pills .nav-link{
@@ -423,7 +458,6 @@ body{
     align-items: center;
     gap: 2rem;
 }
-
 
 input[type='radio']{
     margin: 0.3rem;
@@ -474,16 +508,17 @@ Vytvořte novou stránku 'Purchases Overview'.
 
 ### Popis:
 * Filtr ročního období pro všechny grafy na stránce
-* Graf 1: Barplot zobrazující počet objednávek učiněných muži nebo ženami (sloupec 'Gender') buď dle položek (sloupec 'Item') nebo kategorií položek ('sloupec 'Category'). Filtr seskupení -- radio button.
+* **Graf 1**: Barplot zobrazující počet objednávek učiněných muži nebo ženami (sloupec 'Gender') buď dle položek (sloupec 'Item') nebo kategorií položek ('sloupec 'Category'). Filtr seskupení -- radio button.
 <img src="./readme_images/purchases_item.png" width="650"/> <img src="./readme_images/purchases_category.png" width="650"/>
-* Graf 2: Donut chart zobrazující použité platební metody (sloupec 'Payment'), kde lze pomocí Slideru filtrovat věkové rozpětí (sloupce 'Age')
-* Graf 3: Skládaný (stacked) Barplot zobrazující zastoupení objednávek v jednotlivých frekvencích nákupu ('sloupec 'Frequency') na základě uplatnění slevy (sloupec 'Discount'; hodnoty Yes/No). V grafu lze filtrovat data dle pohlaví (sloupec 'Gender') pomocí Chechbutton.
-    * zde je seznam logicky seřazených možností frekvencí nákupu:
+* **Graf 2**: Donut chart zobrazující použité platební metody (sloupec 'Payment'), kde lze pomocí Slideru filtrovat věkové rozpětí (sloupce 'Age')
+* **Graf 3**: Skládaný (stacked) Barplot zobrazující zastoupení objednávek v jednotlivých frekvencích nákupu ('sloupec 'Frequency') na základě uplatnění slevy (sloupec 'Discount'; hodnoty Yes/No). V grafu lze filtrovat data dle pohlaví (sloupec 'Gender') pomocí Chechbutton.
+    * zde je seznam logicky seřazených možností frekvencí nákupu (pro seřazení hodnot na ose x):
         ```python
         freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
         ```
 
 ### Nápovědy a řešení
+
 **Layout a komponenty Card:**
 -   <details>
     <summary>Řešení: Layout</summary>
@@ -513,7 +548,7 @@ Vytvořte novou stránku 'Purchases Overview'.
         dbc.CardBody([
             html.H3('Purchases by Item and Category'),
             html.Div([
-                html.Label('Group by: '),
+                html.Label('Group by:'),
                 dbc.RadioItems(
                     id='group_by',
                     options=[
@@ -540,7 +575,7 @@ Vytvořte novou stránku 'Purchases Overview'.
         dbc.CardBody([
             html.H3('Purchase Frequency by Discount Usage'),
             html.Div([
-                html.Label('Select Gender(s): '),
+                html.Label('Select Gender(s):'),
                 dbc.Checklist(
                     id='gender_filter',
                     options=[{'label': g, 'value': g} for g in sorted(df['Gender'].unique())],
@@ -588,12 +623,11 @@ Vytvořte novou stránku 'Purchases Overview'.
 
 ---
 **Callback a grafy:**
+
 * Graf 1 - Grouped Barplot Items-Category
    <details>
     <summary>Nápověda</summary>
-    <ul>
-        <li><code>plotly.express.bar(df, x, y, mode='group')</code></li>
-    <ul>
+    <code>plotly.express.bar(df, x, y, color='Gender', barmode='group')</code>
     </details>
 
     <details>
@@ -622,34 +656,30 @@ Vytvořte novou stránku 'Purchases Overview'.
 * Graf 2 - Stacked Barplot Frequency-Discount
    <details>
     <summary>Nápověda</summary>
-    <ul>
-        <li><code>plotly.express.bar(df, x, y, mode='stack')</code></li>
-    <ul>
+    <code>plotly.express.bar(df, x, y, color='Discount', barmode='stack')</code><br>
+    Seřazení hodnot na ose x: <code>figure.update_xaxes(categoryorder='array', categoryarray=['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually'])</code>
     </details>
     <details>
     <summary>Řešení</summary>
 
     ```python
     @dash.callback(
-        Output({id_graph}, 'figure')
-        Input({id_season_filtr}, 'value')
+        Output({id_graph}, 'figure'),
+        Input({id_season_filter}, 'value'),
         Input({id_gender_filter}, 'value'))
     def update_graph(selected_seasons, selected_genders):
-        # Filtr season
+        # Filter by season and gender
         dff = df[df['Season'].isin(selected_seasons)]
-         
-        dff = df[df['Gender'].isin(selected_genders)]
+        dff = dff[dff['Gender'].isin(selected_genders)]
+
         freq_counts = dff.groupby(['Frequency', 'Discount']).size().reset_index(name='Count')
-
-        freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
-        freq_counts['Frequency'] = pd.Categorical(freq_counts['Frequency'], categories=freq_order, ordered=True)
-        freq_counts = freq_counts.sort_values('Frequency')
-
-        fig_bar_freq = px.bar(freq_counts,
-                    x='Frequency', y='Count', color='Discount',
-                    barmode='stack',
-                    labels={'Frequency': 'Purchase Frequency', 'Count': 'Number of Customers'})
         
+        fig_bar_freq = px.bar(freq_counts,
+                        x='Frequency', y='Count', color='Discount',
+                        barmode='stack',
+                        labels={'Frequency': 'Purchase Frequency', 'Count': 'Number of Customers'})
+        fig_bar_freq.update_xaxes(categoryorder='array', categoryarray=['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually'])
+
         return fig_bar_freq
     ```
     </details>
@@ -658,9 +688,7 @@ Vytvořte novou stránku 'Purchases Overview'.
 * Graf 3 - Donut chart Payment method
    <details>
     <summary>Nápověda</summary>
-    <ul>
-        <li>Vytvoření donut chart pomocí pie chart s parametrem 'hole': <code>plotly.express.pie(df, names='Column', values='Column', hole={float})</code></li>
-    <ul>
+    Vytvoření donut chart pomocí pie chart s parametrem 'hole': <code>plotly.express.pie(df, names='Column', values='Column', hole={float})</code>
     </details>
     <details>
     <summary>Řešení: Graf 3</summary>
@@ -688,4 +716,3 @@ Vytvořte novou stránku 'Purchases Overview'.
         return fig_donut
     ```
     </details>
----

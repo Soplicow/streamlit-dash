@@ -70,6 +70,7 @@ from dash import Dash, dcc, html
 
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
 app.title = 'Dashboard'
+app._favicon = ('./dashboard.png')
 
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -226,7 +227,7 @@ For clarity, we will store the contents of individual `dbc.Card` in variables, w
 * `season_filter` — filter for seasons used across all charts:
     ```python
     season_filter = html.Div([
-        html.Label('Season: '),
+        html.Label('Season:'),
         dbc.Checklist(
             id='season_filter',
             options=['Spring', 'Summer', 'Fall', 'Winter'],
@@ -245,14 +246,12 @@ For clarity, we will store the contents of individual `dbc.Card` in variables, w
     gender_card = dbc.Card([
         dbc.CardBody([
             html.H3('Gender'),
-            dbc.Row(
-                dcc.Dropdown(
-                    id='location_dropdown',
-                    options=[{'label': loc, 'value': loc} for loc in sorted(df['State_name'].unique())],
-                    value=df['State_name'].unique()[0],
-                    className='dropdown'
+            dcc.Dropdown(
+                id='location_dropdown',
+                options=[{'label': loc, 'value': loc} for loc in sorted(df['State_name'].unique())],
+                value=df['State_name'].unique()[0],
+                className='dropdown'
                 ),
-            ),
             dcc.Graph(id='gender_pie')
         ])
     ], className='h-100')
@@ -263,7 +262,7 @@ For clarity, we will store the contents of individual `dbc.Card` in variables, w
     location_card = dbc.Card([
         dbc.CardBody([
             html.H3('Location'),
-            html.Label('Select age range: '),
+            html.Label('Select age range:'),
             dcc.RangeSlider(
                 id='age_range',
                 min=int(df['Age'].min()),
@@ -271,7 +270,7 @@ For clarity, we will store the contents of individual `dbc.Card` in variables, w
                 step=1,
                 value=[int(df['Age'].min()), int(df['Age'].max())],
                 marks={i: str(i) for i in range(int(df['Age'].min()), int(df['Age'].max()) + 1, 5)},
-                tooltip={"placement": "bottom", "always_visible": True},
+                tooltip={'placement': 'bottom', 'always_visible': True},
                 className='slider'
             ),
             dcc.Graph(id='location_choropleth')
@@ -295,7 +294,7 @@ For clarity, we will store the contents of individual `dbc.Card` in variables, w
         dbc.CardBody([
             html.H3('Age'),
             html.Div([
-                html.Label('Select gender: '),
+                html.Label('Select gender:'),
                 dbc.RadioItems(
                     id='gender_radio',
                     options=[{'label': g, 'value': g} for g in df['Gender'].unique()],
@@ -324,7 +323,7 @@ layout = dbc.Container([
             dbc.Col(review_card, width=7, className='card_chart'),
             dbc.Col(age_card, width=5, className='card_chart')
         ])
-],fluid=True)
+], fluid=True)
 ```
 
 ## 4. Callback
@@ -352,12 +351,49 @@ The order of Inputs corresponds to the inputs of the function and the return val
 ```
 
 ### Creating charts
+The `dcc.Graph` component renders data visualizations using graphs passed as the `figure` argument.
 
 The function under the `@dash.callback` decorator returns `figure` for each graph. The parameters are entered into the function in the order specified in the Inputs. The function must return the graphs in the order as defined in the Outputs (and therefore in the `layout`).
 
-## 5. Styling
+```python
+def update_graphs(seasons, selected_location, selected_gender, selected_age_range):
+    dff = df[df['Season'].isin(seasons)]
 
-Set the color palette (and plotly theme) globally in `app.py`:
+    # Gender Pie
+    pie_df = dff[dff['State_name'] == selected_location]
+    fig_pie = px.pie(pie_df, names='Gender')
+    fig_pie.update_layout(height=400)
+
+    # Choropleth map (grouped and counted by state)
+    pastel_colorscale = [[0.0, '#A8DADC'], [1.0, '#C5a3D9']] 
+    min_age, max_age = selected_age_range
+    age_df = dff[(dff['Age'] >= min_age) & (dff['Age'] <= max_age)]
+    age_df = age_df.groupby('State_abbr').size().reset_index(name='Count')
+    fig_map = px.choropleth(
+        age_df,
+        locations='State_abbr',
+        locationmode='USA-states',
+        scope='usa',
+        color='Count',
+        color_continuous_scale=pastel_colorscale)
+    fig_map.update_layout(height=450)
+
+    # Average Review Rating Line Chart
+    agg_df = dff.groupby('Amount')['Review_Rating'].mean().reset_index()
+    fig_line = px.line(agg_df, x='Amount', y='Review_Rating', markers=True)
+    fig_line.update_layout(xaxis_title='Amount (USD)', yaxis_title='Average Review Rating', height=450)
+
+    # Age Histogram
+    gender_df = dff[dff['Gender'] == selected_gender]
+    fig_hist = px.histogram(gender_df, x='Age', nbins=20)
+    fig_hist.update_layout(height=400)
+    fig_hist.update_traces(marker_color='#C5a3D9', marker_line_width=1, marker_line_color='white')
+
+    return fig_pie, fig_map, fig_line, fig_hist
+```
+
+## 5. Styling
+Set the color palette and plotly.theme globally in `app.py`:
 ```python
 import plotly.io as pio
 
@@ -438,7 +474,27 @@ input[type='checkbox']{
 .radio label{
     margin-right: 2rem;
 }
+.radio-button{
+    background-color: white;
+    border: solid 2px #C5a3D9;
+    accent-color: #C5a3D9;
+}
+
+.slider .rc-slider-track{
+    background-color: var(--color-purple);
+}
+  
+.slider .rc-slider-dot-active {  
+    border-color: lightgray;
+    border: solid 2px lightgray;
+  }
+  
+.slider  .rc-slider-handle {
+    background-color: white;
+    border-color: var(--color-purple);
+  }
 ```
+
 ## 6. Task  
 Create a new page called **'Purchases Overview'**.
 
@@ -452,17 +508,16 @@ Create a new page called **'Purchases Overview'**.
 
 ### Description:
 * Season filter for all charts on the page
-* Chart 1: Barplot showing the number of orders made by men or women (column 'Gender') either by items (column 'Item') or by item categories ('column 'Category'). Grouping filter -- radio button.
+* **Chart 1**: Barplot showing the number of orders made by men or women (column 'Gender') either by items (column 'Item') or by item categories ('column 'Category'). Grouping filter -- radio button.
 <img src="./readme_images/purchases_item.png" width="650"/> <img src="./readme_images/purchases_category.png" width="650"/>
-* Chart 2: Donut chart showing the payment methods used (column 'Payment'), where you can use the Slider to filter by age range (column 'Age')
-* Chart 3: Stacked Barplot showing the representation of orders in individual purchase frequencies (column 'Frequency') based on the application of a discount (column 'Discount'; values ​​Yes/No). In the chart, you can filter data by gender (column 'Gender') using the Chechbutton.
-* here is a list of logically ordered purchase frequency options:
-```python
-freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
-```
+* **Chart 2**: Donut chart showing the payment methods used (column 'Payment'), where you can use the Slider to filter by age range (column 'Age')
+* **Chart 3**: Stacked Barplot showing the representation of orders in individual purchase frequencies (column 'Frequency') based on the application of a discount (column 'Discount'; values ​​Yes/No). In the chart, you can filter data by gender (column 'Gender') using the Chechbutton.
+    * here is a list of logically ordered purchase frequency options:
+    ```python
+    freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
+    ```
 
 ### Helps and solutions
----
 
 **Layout and Card Components:**
 - <details>
@@ -493,7 +548,7 @@ freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 
         dbc.CardBody([
             html.H3('Purchases by Item and Category'),
             html.Div([
-                html.Label('Group by: '),
+                html.Label('Group by:'),
                 dbc.RadioItems(
                     id='group_by',
                     options=[
@@ -521,7 +576,7 @@ freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 
         dbc.CardBody([
             html.H3('Purchase Frequency by Discount Usage'),
             html.Div([
-                html.Label('Select Gender(s): '),
+                html.Label('Select Gender(s):'),
                 dbc.Checklist(
                     id='gender_filter',
                     options=[{'label': g, 'value': g} for g in sorted(df['Gender'].unique())],
@@ -575,7 +630,7 @@ freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 
 * Chart 1 — Grouped Barplot: Items-Category
   <details>
   <summary>Help</summary>
-  Use: <code>plotly.express.bar(df, x, y, barmode='group')</code>
+  <code>plotly.express.bar(df, x, y,  color='Gender', barmode='group')</code>
   </details>
 
   <details>
@@ -583,19 +638,19 @@ freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 
 
   ```python
   @dash.callback(
-      Output({id_graph}, 'figure'),
-      Input({id_season_filter}, 'value'),
-      Input({id_group_by}, 'value'))
+    Output({id_graph}, 'figure'),
+    Input({id_season_filter}, 'value'),
+    Input({id_group_by}, 'value'))
   def update_graph(selected_seasons, group_by):
-      # Filter by season
-      dff = df[df['Season'].isin(selected_seasons)]
+    # Filter by season
+    dff = df[df['Season'].isin(selected_seasons)]
 
-      grouped = dff.groupby([group_by, 'Gender']).size().reset_index(name='Count')
+    grouped = dff.groupby([group_by, 'Gender']).size().reset_index(name='Count')
 
-      fig_bar_item_cat = px.bar(grouped, x=group_by, y='Count', color='Gender', barmode='group')
-      fig_bar_item_cat.update_layout(xaxis_title=group_by, yaxis_title='Number of Orders')
+    fig_bar_item_cat = px.bar(grouped, x=group_by, y='Count', color='Gender', barmode='group')
+    fig_bar_item_cat.update_layout(xaxis_title=group_by, yaxis_title='Number of Orders')
 
-      return fig_bar_item_cat
+    return fig_bar_item_cat
   ```
   </details>
 
@@ -604,33 +659,32 @@ freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 
 * Chart 2 — Stacked Barplot: Frequency-Discount
   <details>
   <summary>Help</summary>
-  Use: <code>plotly.express.bar(df, x, y, barmode='stack')</code>
+  <code>plotly.express.bar(df, x, y, color='Discount', barmode='stack')</code><br>
+  Ordering values ​​on the x-axis: <code>figure.update_xaxes(categoryorder='array', categoryarray=['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually'])</code>
   </details>
 
   <details>
   <summary>Solution</summary>
 
   ```python
-  @dash.callback(
-      Output({id_graph}, 'figure'),
-      Input({id_season_filter}, 'value'),
-      Input({id_gender_filter}, 'value'))
-  def update_graph(selected_seasons, selected_genders):
-      # Filter by season and gender
-      dff = df[df['Season'].isin(selected_seasons)]
-      dff = dff[dff['Gender'].isin(selected_genders)]
+    @dash.callback(
+        Output({id_graph}, 'figure'),
+        Input({id_season_filter}, 'value'),
+        Input({id_gender_filter}, 'value'))
+    def update_graph(selected_seasons, selected_genders):
+        # Filter by season and gender
+        dff = df[df['Season'].isin(selected_seasons)]
+        dff = dff[dff['Gender'].isin(selected_genders)]
 
-      freq_counts = dff.groupby(['Frequency', 'Discount']).size().reset_index(name='Count')
+        freq_counts = dff.groupby(['Frequency', 'Discount']).size().reset_index(name='Count')
+        
+        fig_bar_freq = px.bar(freq_counts,
+                        x='Frequency', y='Count', color='Discount',
+                        barmode='stack',
+                        labels={'Frequency': 'Purchase Frequency', 'Count': 'Number of Customers'})
+        fig_bar_freq.update_xaxes(categoryorder='array', categoryarray=['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually'])
 
-      freq_order = ['Weekly', 'Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 'Quarterly', 'Annually']
-      freq_counts['Frequency'] = pd.Categorical(freq_counts['Frequency'], categories=freq_order, ordered=True)
-      freq_counts = freq_counts.sort_values('Frequency')
-
-      fig_bar_freq = px.bar(freq_counts,
-                            x='Frequency', y='Count', color='Discount',
-                            barmode='stack',
-                            labels={'Frequency': 'Purchase Frequency', 'Count': 'Number of Customers'})
-      return fig_bar_freq
+        return fig_bar_freq
   ```
   </details>
 
@@ -639,7 +693,7 @@ freq_order = ['Weekly','Bi-Weekly', 'Fortnightly', 'Monthly', 'Every 3 Months', 
 * Chart 3 — Donut Chart: Payment Method
   <details>
   <summary>Help</summary>
-  Create a donut chart using `px.pie()` with the `hole` parameter: <code>plotly.express.pie(df, names='Column', values='Column', hole=0.4)</code>
+  Create a donut chart using pie chart with the 'hole' parameter: <code>plotly.express.pie(df, names='Column', values='Column', hole={float})</code>
   </details>
 
   <details>

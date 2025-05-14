@@ -25,7 +25,6 @@ body{
     width: 16rem;
     padding: 1rem 1rem;
     background-color: #ffffff;
-
 }
 
 .nav-pills .nav-link{
@@ -35,14 +34,6 @@ body{
 .nav-pills .nav-link.active{
     background-color: var(--color-purple);
     color: white;
-}
-
-.accordion-button {
-    font-size: 14px;
-}
-
-.accordion-button:not(.collapsed) {
-    background-color: white;
 }
 
 .card-title{
@@ -59,7 +50,6 @@ body{
     align-items: center;
     gap: 2rem;
 }
-
 
 input[type='radio']{
     margin: 0.3rem;

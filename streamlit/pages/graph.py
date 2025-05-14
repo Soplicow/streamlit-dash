@@ -2,18 +2,17 @@ import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
 
+@st.cache_data
 def get_stock_data(symbol, period="1y", interval="1d"):
     """Fetch stock data from Yahoo Finance."""
     try:
         stock_data = yf.Ticker(symbol)
         stock_history = stock_data.history(period = period, interval = interval)
         if stock_history.empty:
-            st.warning(f"No data available for {symbol} with period '{period}' and interval '{interval}'.")
             return None
 
         return stock_history
     except Exception as e:
-        st.error(f"Error fetching data for {symbol}: {e}")
         return None
 
 st.write("# Graph Page")
@@ -55,4 +54,4 @@ if st.button("Search"):
         except Exception as e:
             st.error(f"Error plotting data: {e}")
     else:
-        st.write("No data available")
+        st.warning("No data available for the selected stock symbol.")
